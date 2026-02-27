@@ -18,20 +18,36 @@ jobs:
       with:
       # busqueda profunda en historial de commit con fetch-depth
         fetch-depth: 0
+    - name: Git Semantic Version
+      uses: PaulHatch/semantic-version@v4.0.3
+      with:
+      # major cambios garndes
+        major_pattern: "major:"
+        # cambios pequenos
+        minor_pattern: "feat:"
+        # cada commit incrementara 
+        format: "${major}.${minor}.${patch}-prerelease${increment}"
+      id: version
         
     - name: Docker login
       env:
         DOCKER_USER: ${{ secrets.DOCKER_USER }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        # de los steps tomamos el outps que es un arreglo y pasamos la version
+        NEW_VERSION: ${{ steps.version.outputs.version }}
+        
       run: |
         docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-    - name: Build Docker image
-      run: |
-        docker build -t alex146/docker-graphql:0.0.1 .
-        docker build -t alex146/docker-graphql:latest .
-    - name: Push docker image
-      run: |
-        docker push alex146/docker-graphql:0.0.1
-        docker push alex146/docker-graphql:latest
+        echo "New version: $NEW_VERSION!!!!!!!"
+        
+        
+    # - name: Build Docker image
+    #   run: |
+    #     docker build -t alex146/docker-graphql:0.0.1 .
+    #     docker build -t alex146/docker-graphql:latest .
+    # - name: Push docker image
+    #   run: |
+    #     docker push alex146/docker-graphql:0.0.1
+    #     docker push alex146/docker-graphql:latest
     # - name: Build the Docker image
     #   run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
